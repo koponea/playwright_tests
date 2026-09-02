@@ -25,5 +25,8 @@
   "devDependencies": {
     "@playwright/test": "^1.62.1",
     "@types/node": "^26.4.1"
+  },
+  "dependencies": {
+    "lodash": "^4.18.1"
   }
 }
