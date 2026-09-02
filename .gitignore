@@ -1,0 +1,15 @@
+
+# Playwright
+node_modules
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
+
+# files
+tests/example.spec.ts
+lazy_kopone.md
+
+#config
+.env
