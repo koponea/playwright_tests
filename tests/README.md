@@ -4,18 +4,10 @@ This test folder a restricted but efficient UI automation suite implemented usin
 
 The test target site is <https://www.saucedemo.com/>. The tests cover the site’s core features and risks.
 
-## Requirements for the tests implementation
+## Notes
 
-The original requirements set include the following specifications:
+- The test target is a publicly accessible website; no local server, separate authentication, or `.env` configuration is required.
 
-- Tests must use a web-browser (no API-only solutions)
-- No fixed sleeps
-- Clear locator strategy (avoid brittle selectors)
-- Maintainable structure (Page Objects or clear Keyword-structure)
-- One-command run, documented in README
-- __*AI tools are allowed and also recommended*__
+- current, ongoing: Running 7 tests using 1 worker 7 passed (34.1s)
 
-## Deliverables
-
-- Code, README.md, test_design.md, ai_usage.md
-- Single contributor: Aila Koponen
+- See the upper level README.md for tests requirements, the repo cloning, and installation instructions when a clean test environment.
