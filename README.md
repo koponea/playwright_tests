@@ -1,6 +1,6 @@
 # Repository playwrite_tests
 
-This repository contains test folder of a project of a restricted but efficient UI automation suite implemented using Playwright and Typescript.
+This repository contains a project with a test folder containig a restricted but efficient UI automation suite implemented using Playwright and Typescript.
 
 The test target site is <https://www.saucedemo.com/>. The tests cover the site’s core features and risks.
 
@@ -12,12 +12,12 @@ The original requirements set include the following specifications:
 - No fixed sleeps
 - Clear locator strategy (avoid brittle selectors)
 - Maintainable structure (Page Objects or clear Keyword-structure)
-- One-command run, documented in README
-- __*AI tools are allowed and also recommended*__ (usage documented in ai_usage.md file)
+- One-command run, documented in *README.md*
+- __AI tools are allowed and also recommended__ (usage documented in *ai_usage.md* file)
 
 ## Deliverables
 
-- Code, this README.md, test_design.md, ai_usage.md, see tests directory
+- Code, this *README.md*, *test_design.md*, *ai_usage.md*, see the *tests* directory
 - Single contributor: Aila Koponen
 
 ## Test Suite Setup
@@ -120,6 +120,8 @@ Run the full test suite headlessly:
 npx playwright test
 ```
 
+>`--project` option runs the tests with one of the three given browser engines only. See the *playwrite.config.ts* for the currently defined browser engines. E.g., run only with chromium: `npx playwright test -- --project chromium`
+
 Run tests with the interactive UI mode:
 
 ```bash
@@ -134,5 +136,6 @@ npx playwright show-report
 
 ### Notes
 
-- The tests can also be run with 'npx test' or 'npx run test -- --ui' and the report can be obtained with 'npx run test:report' (instead of the 'playwright show-report') as the commands are added to the package.json configuration
-- The test target is a publicly accessible website; no local server, separate authentication, or `.env` configuration is required.
+- The project configurations in *playwright.config.js* is by default running tests parallel using multiple workers. There might be need to run non-parallel due to e.g. the checkout phase and the fact that the suite needs to log in with the user with most rights when only one such is currently provided. This suite does not do testing of the user handling more than what is needed to login and to verify that the login works generally as expected. Also, is the DB usage tested for concurrent use if the same user in different browsers has baskets entering the checkout phase? Playwright runs tests havily in parallell which in turn could be really efficient, but the usage of the DB will not verified within the current timebox.
+- The playwright timeout is increased in *playwright.config.js* to allow more time for the login procedure. It should be adjusted when the headless login implememtation is introduced. For future test suites it is a must for reducing the suite time budget.
+- The test target is a publicly accessible website; no local server, separate authentication, or *.env* configuration is required.
