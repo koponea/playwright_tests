@@ -1,5 +1,7 @@
 # Repository playwrite_tests
 
+******UNDER CONSTRUCTION !! tests all playable***
+
 This repository contains a project with a test folder containig a restricted but efficient UI automation suite implemented using Playwright and Typescript.
 
 The test target site is <https://www.saucedemo.com/>. The tests cover the site’s core features and risks.

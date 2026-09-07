@@ -8,6 +8,6 @@ The test target site is <https://www.saucedemo.com/>. The tests cover the siteâ€
 
 - The test target is a publicly accessible website; no local server, separate authentication, or `.env` configuration is required.
 
-- current, ongoing: Running 7 tests using 1 worker 7 passed (34.1s)
+- current, ongoing: Running 7 tests using 1 worker 7 passed ~34s, 4 workers parallel ~15 sec
 
 - See the upper level README.md for tests requirements, the repo cloning, and installation instructions when a clean test environment.

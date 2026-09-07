@@ -1,6 +1,8 @@
 import { test, expect, type Locator, type Page } from '@playwright/test';
 const { describe } = require('@playwright/test')
 
+/******UNDER CONSTRUCTION !! tests all playable***/
+
 interface User {
   password: string;
   username: string;
@@ -39,7 +41,7 @@ class SauceDemoLoginPage { // move to be imported
   }
 
   async goto() {
-    await this.page.goto(baseUrl)
+    await this.page.goto('/')
     await this.page.waitForURL(new RegExp(`^${baseUrl}.*`));
     await expect(this.page.getByText(this.titleText)).toBeVisible();
     await expect(this.loginCredentialsGrid).toBeVisible();
@@ -92,7 +94,15 @@ describe('Saucedemo tests', () => {
     await expect(page.url()).toBe(`${baseUrl}${homePage}`);
   });
 
-  test('main page xx1', async ({ page }) => {
+  test('now only login but test to be defined xx1', async ({ page }) => {
+    const loginPage = new SauceDemoLoginPage(page);
+    await loginPage.login(defaultUser, loginPage.secondaryTitleText, page)
+    await page.waitForURL(new RegExp(`^${baseUrl}${homePage}.*`));
+
+    //tbd 
+  });
+
+  test('now only login but test to be defined xx2', async ({ page }) => {
     const loginPage = new SauceDemoLoginPage(page);
     await loginPage.login(defaultUser, loginPage.secondaryTitleText, page)
     await page.waitForURL(new RegExp(`^${baseUrl}${homePage}.*`));
@@ -100,7 +110,7 @@ describe('Saucedemo tests', () => {
     //tbd
   });
 
-  test('main page xx2', async ({ page }) => {
+  test('now only login but test to be defined xx3', async ({ page }) => {
     const loginPage = new SauceDemoLoginPage(page);
     await loginPage.login(defaultUser, loginPage.secondaryTitleText, page)
     await page.waitForURL(new RegExp(`^${baseUrl}${homePage}.*`));
@@ -108,15 +118,7 @@ describe('Saucedemo tests', () => {
     //tbd
   });
 
-  test('main page xx3', async ({ page }) => {
-    const loginPage = new SauceDemoLoginPage(page);
-    await loginPage.login(defaultUser, loginPage.secondaryTitleText, page)
-    await page.waitForURL(new RegExp(`^${baseUrl}${homePage}.*`));
-
-    //tbd
-  });
-
-  test('main page xx4', async ({ page }) => {
+  test('now only login but test to be defined xx4', async ({ page }) => {
     const loginPage = new SauceDemoLoginPage(page);
     await loginPage.login(defaultUser, loginPage.secondaryTitleText, page)
     await page.waitForURL(new RegExp(`^${baseUrl}${homePage}.*`));
