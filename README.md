@@ -14,12 +14,12 @@ The original requirements set include the following specifications:
 - No fixed sleeps
 - Clear locator strategy (avoid brittle selectors)
 - Maintainable structure (Page Objects or clear Keyword-structure)
-- One-command run, documented in *README.md*
-- __AI tools are allowed and also recommended__ (usage documented in *ai_usage.md* file)
+- One-command run, documented in [README.md](./README.md)
+- **AI tools are allowed and also recommended** (usage documented in *ai_usage.md* file)
 
 ## Deliverables
 
-- Code, this *README.md*, *test_design.md*, *ai_usage.md*, see the *tests* directory
+- Code, this [README.md](./README.md), [test_design.md](tests/test_design.md), [ai_usage.md](tests/ai_usage.md), see the *tests* directory
 - Single contributor: Aila Koponen
 
 ## Test Suite Setup
@@ -34,20 +34,20 @@ The following tools must be installed before setting up the project.
 
 Used to clone the repository.
 
-__Linux (Debian/Ubuntu):__
+**Linux (Debian/Ubuntu):**
 
 ```bash
 sudo apt-get update
 sudo apt-get install -y git
 ```
 
-__macOS (Homebrew):__
+**macOS (Homebrew):**
 
 ```bash
 brew install git
 ```
 
-__Windows:__
+**Windows:**
 
 ```powershell
 winget install --id Git.Git -e --source winget
@@ -55,22 +55,22 @@ winget install --id Git.Git -e --source winget
 
 #### 2. Node.js (includes npm)
 
-Requires __Node.js 18 or later__.
+Requires **Node.js 18 or later**.
 
-__Linux (Debian/Ubuntu):__
+**Linux (Debian/Ubuntu):**
 
 ```bash
 curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
 sudo apt-get install -y nodejs
 ```
 
-__macOS (Homebrew):__
+**macOS (Homebrew):**
 
 ```bash
 brew install node
 ```
 
-__Windows:__
+**Windows:**
 
 ```powershell
 winget install OpenJS.NodeJS.LTS
@@ -100,7 +100,7 @@ npm install
 
 #### 3. Install Playwright browser binaries
 
-__Linux:__
+**Linux:**
 
 ```bash
 npx playwright install --with-deps
@@ -108,7 +108,7 @@ npx playwright install --with-deps
 
 > `--with-deps` also installs OS-level libraries (e.g. `libnss3`, `libatk`) that browsers require on Linux. This flag is not needed on macOS or Windows, as the OS already provides the required libraries.
 
-__macOS / Windows:__
+**macOS / Windows:**
 
 ```bash
 npx playwright install
@@ -136,8 +136,12 @@ View the HTML report after a run:
 npx playwright show-report
 ```
 
-### Notes
+### Notes and some future concerns
 
-- The project configurations in *playwright.config.js* is by default running tests parallel using multiple workers. There might be need to run non-parallel due to e.g. the checkout phase and the fact that the suite needs to log in with the user with most rights when only one such is currently provided. This suite does not do testing of the user handling more than what is needed to login and to verify that the login works generally as expected. Also, is the DB usage tested for concurrent use if the same user in different browsers has baskets entering the checkout phase? Playwright runs tests havily in parallell which in turn could be really efficient, but the usage of the DB will not verified within the current timebox.
-- The playwright timeout is increased in *playwright.config.js* to allow more time for the login procedure. It should be adjusted when the headless login implememtation is introduced. For future test suites it is a must for reducing the suite time budget.
-- The test target is a publicly accessible website; no local server, separate authentication, or *.env* configuration is required.
+- The project configurations in [playwright.config.md](tests/playwright.config.md) are by default running tests parallel using multiple workers. There might be need to run non-parallel due to e.g. the checkout phase and the fact that the suite needs to log in with the user with most rights when only one such is currently provided. This suite does not do testing of the user handling more than what is needed to login and to verify that the login works generally as expected.
+
+- Also, is the DB usage tested for concurrent use if the same user in different browsers has baskets entering the checkout phase? Playwright runs tests havily in parallell which in turn could be really efficient, but the correct usage of the utilized DB as such will not verified within the current timebox.
+
+- The playwright timeout is increased in [playwright.config.md](tests/playwright.config.md) to allow more time for the login procedure. It should be adjusted when the headless login implememtation is introduced. For future test suites it is a must for reducing the suite time budget.
+
+- The test target is a publicly accessible website; no local server, separate authentication, or *.env* configuration is necessarily required (.env handling is offered and documented).

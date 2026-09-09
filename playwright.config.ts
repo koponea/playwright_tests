@@ -13,7 +13,8 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: './tests',
-  timeout: 60_000, // beforeEach login is a bit long
+  timeout: 60_000, // beforeEach login is a bit long, 3000-5000 should do
+  expect: { timeout: 10_000 }, /* for test dev phase, default 5000*/
   /* Run tests in files in parallel, default true */
   fullyParallel: true,
   //fullyParallel: false,
@@ -29,7 +30,8 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('')`. */
-  baseURL: 'https://www.saucedemo.com/',
+    // defa 'http://localhost:3000'
+    baseURL: process.env.DEMO_PORTAL_URL ? process.env.DEMO_PORTAL_URL : 'https://www.saucedemo.com/',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
@@ -46,13 +48,13 @@ export default defineConfig({
       name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
     },
-/*
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },*()
-
-    /* Test against mobile viewports. */
+    /*
+        {
+          name: 'webkit',
+          use: { ...devices['Desktop Safari'] },
+        },*()
+    
+        /* Test against mobile viewports. */
     // {
     //   name: 'Mobile Chrome',
     //   use: { ...devices['Pixel 5'] },

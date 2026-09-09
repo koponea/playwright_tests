@@ -1,6 +1,6 @@
 # Tests, repository playwrite_tests (ONGOING!!)
 
-This test folder a restricted but efficient UI automation suite implemented using Playwright and Typescript. (current, ongoing: Running 7 tests using 1 worker 7 passed (34.1s))
+This test folder a restricted but efficient UI automation suite implemented using Playwright and Typescript.
 
 The test target site is <https://www.saucedemo.com/>. The tests cover the site’s core features and risks.
 

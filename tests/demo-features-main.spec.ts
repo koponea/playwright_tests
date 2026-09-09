@@ -1,5 +1,6 @@
 import { test, expect, type Locator, type Page } from '@playwright/test';
 const { describe } = require('@playwright/test')
+const config = require('../utils/config')
 
 /******UNDER CONSTRUCTION !! tests all playable***/
 
@@ -8,18 +9,28 @@ interface User {
   username: string;
 }
 const defaultUser: User = {
-  username: 'performance_glitch_user',
-  password: 'secret_sauce'
+  username: config.USERNAME_DEFAULT,
+  password: config.PASSWORD_DEFAULT
 };
-const baseUrl = 'https://www.saucedemo.com/'
-const homePage = 'inventory.html'
-const portalHeader = 'Swag Labs';
+const defultUsernameArray: string[] =
+  config.USERNAMES_DEFAULT.split(/\s+/);
+
+const baseUrl = config.DEMO_PORTAL_URL;
+const portalHeader = config.DEMO_PORTAL_HEADER;
 const portalHomeSecondaryHeader = 'Products';
 
+const pathInventory = '/inventory.html'; // home landingpage
+const pathDetails = '/inventory-item.html'; // e.g. /inventory-item.html?id=4
+const pathCart = '/cart.html';
+const pathCheckoutInfo = '/checkout-step-one.html';
+const pathCheckoutOverview = '/checkout-step-two.html';
+const pathCheckoutComplete = '/checkout-complete.html';
+// pdf receipt at checkout e.g.:
+// file:///home/aila/Downloads/swag-labs-order-2026-09-09_19-44-47.pdf
 
 const dataTest = (locator: string) => `[data-test=${locator}]`
 
-class SauceDemoLoginPage { // move to be imported
+class SauceDemoLoginPage {
   readonly page: Page;
   readonly loginButton: Locator;
   readonly passwordInput: Locator;
@@ -54,6 +65,15 @@ class SauceDemoLoginPage { // move to be imported
       .toContainText(new RegExp(`.*${user.password}.*`));
   };
 
+  async verifyAllLoginCredentials(users: string[] | User[]) {
+    users.forEach(async (user: string | User) => {
+      const userToCheck: User = (typeof user == 'string')
+        ? { username: user, password: config.PASSWORD_DEFAULT }
+        : user;
+      await this.verifyLoginCredentials(userToCheck);
+    });
+  }
+
   async useLoginCredentials(user: User) {
     await this.usernameInput.fill(user.username);
     await this.passwordInput.fill(user.password);
@@ -79,50 +99,77 @@ class SauceDemoLoginPage { // move to be imported
   };
 }
 
-describe('Saucedemo tests', () => {
-  test('basic login with general access credentials', async ({ page }) => {
+class SauceDemoInventoryPage { }
+
+class SauceDemoDetailsPage { }
+
+class SauceDemoCartPage { }
+
+class SauceDemoCheckoutInfoPage { }
+
+class SauceDemoCheckoutOverviewPage { }
+
+class SauceDemoCheckoutCompletePage { }
+
+describe('Saucedemo shopping portal', () => {
+  test('Basic login and general access credentials', async ({ page }) => {
     const loginPage = new SauceDemoLoginPage(page);
     await loginPage.goto();
 
     await expect(page).toHaveTitle(new RegExp(`^${loginPage.titleText}$`));
     await expect(page.getByText(loginPage.titleText)).toBeVisible();
 
+    await loginPage.verifyAllLoginCredentials(defultUsernameArray)
+
     await loginPage.verifyLoginCredentials(defaultUser);
     await loginPage.useLoginCredentials(defaultUser);
     await loginPage.submitAndVerifyLanding(loginPage.secondaryTitleText, page);
 
-    await expect(page.url()).toBe(`${baseUrl}${homePage}`);
+    await expect(page.url()).toBe(`${baseUrl}${pathInventory}`);
+  });
+  describe('Shopping without intent to check-out', () => {
+    test('Items can be browsed and de-carted with regular logout', async ({ page }) => {
+      //basic logout when no purchase
+      const loginPage = new SauceDemoLoginPage(page);
+      await loginPage.login(defaultUser, loginPage.secondaryTitleText, page)
+      await page.waitForURL(new RegExp(`^${baseUrl}${pathInventory}.*`));
+
+      // login complete, continue case after this
+    });
+
+    test('Bailing out mid shopping', async ({ page }) => {
+      //basic logout when no purchase
+      const loginPage = new SauceDemoLoginPage(page);
+      await loginPage.login(defaultUser, loginPage.secondaryTitleText, page)
+      await page.waitForURL(new RegExp(`^${baseUrl}${pathInventory}.*`));
+
+      // login complete, continue case after this
+    });
   });
 
-  test('now only login but test to be defined xx1', async ({ page }) => {
-    const loginPage = new SauceDemoLoginPage(page);
-    await loginPage.login(defaultUser, loginPage.secondaryTitleText, page)
-    await page.waitForURL(new RegExp(`^${baseUrl}${homePage}.*`));
+  describe('Shopping with intent to check-out', () => {
+    test('Checking out with purchase and receipt', async ({ page }) => {
+      const loginPage = new SauceDemoLoginPage(page);
+      await loginPage.login(defaultUser, loginPage.secondaryTitleText, page)
+      await page.waitForURL(new RegExp(`^${baseUrl}${pathInventory}.*`));
 
-    //tbd 
+      // login complete, continue case after this
+    });
+
+    test('Cheking out with no purchase', async ({ page }) => {
+      const loginPage = new SauceDemoLoginPage(page);
+      await loginPage.login(defaultUser, loginPage.secondaryTitleText, page)
+      await page.waitForURL(new RegExp(`^${baseUrl}${pathInventory}.*`));
+
+      // login complete, continue case after this
+    });
   });
 
-  test('now only login but test to be defined xx2', async ({ page }) => {
+  test('Linking outside the portal', async ({ page }) => {
     const loginPage = new SauceDemoLoginPage(page);
     await loginPage.login(defaultUser, loginPage.secondaryTitleText, page)
-    await page.waitForURL(new RegExp(`^${baseUrl}${homePage}.*`));
+    await page.waitForURL(new RegExp(`^${baseUrl}${pathInventory}.*`));
 
-    //tbd
-  });
-
-  test('now only login but test to be defined xx3', async ({ page }) => {
-    const loginPage = new SauceDemoLoginPage(page);
-    await loginPage.login(defaultUser, loginPage.secondaryTitleText, page)
-    await page.waitForURL(new RegExp(`^${baseUrl}${homePage}.*`));
-
-    //tbd
-  });
-
-  test('now only login but test to be defined xx4', async ({ page }) => {
-    const loginPage = new SauceDemoLoginPage(page);
-    await loginPage.login(defaultUser, loginPage.secondaryTitleText, page)
-    await page.waitForURL(new RegExp(`^${baseUrl}${homePage}.*`));
-
-    //tbd
+    // login complete, continue case after this
   });
 });
