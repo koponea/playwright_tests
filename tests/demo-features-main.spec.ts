@@ -242,12 +242,39 @@ describe('Saucedemo shopping portal', () => {
     });
 
     test('Bailing out mid shopping', async ({ page }) => {
-      //basic logout when no purchase
       const loginPage = new SauceDemoLoginPage(page);
-      await loginPage.login(defaultUser, loginPage.secondaryTitleText, page)
+      await loginPage.login(defaultUser, loginPage.secondaryTitleText, page);
       await page.waitForURL(new RegExp(`^${baseUrl}${pathInventory}.*`));
 
-      // login complete, continue case after this
+      const inventoryPage = new SauceDemoInventoryPage(page);
+      const detailsPage = new SauceDemoDetailsPage(page);
+
+      const item1 = 'sauce-labs-fleece-jacket';
+      const item1Name = 'Sauce Labs Fleece Jacket';
+      const item2 = 'sauce-labs-onesie';
+
+      // Add two items to cart
+      await inventoryPage.addToCartBtn(item1).click();
+      await expect(inventoryPage.cartBadge).toHaveText('1');
+
+      await inventoryPage.addToCartBtn(item2).click();
+      await expect(inventoryPage.cartBadge).toHaveText('2');
+
+      // Browse to item1 details page by clicking its name
+      await inventoryPage.itemNameLink(item1Name).click();
+      await page.waitForURL(new RegExp(`^${baseUrl}${pathDetails}.*`));
+      await expect(detailsPage.itemName).toHaveText(item1Name);
+
+      // Return to inventory via Back to Products link
+      await detailsPage.goBackToInventory();
+      await expect(page).toHaveURL(new RegExp(`^${baseUrl}${pathInventory}.*`));
+
+      // Cart is still full — user bails out without emptying it
+      await expect(inventoryPage.cartBadge).toHaveText('2');
+
+      // Log out, leaving cart full
+      await inventoryPage.logout();
+      await expect(loginPage.loginButton).toBeVisible();
     });
   });
 
