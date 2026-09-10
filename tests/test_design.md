@@ -50,6 +50,7 @@ The descriptions in this chapter are used as partial input for a large language 
 
 * __Main suite level case: *'Linking outside the portal'*__
   * The portal has links outside the portal e.g. in the side navigation bar/panel, so verification of those is done. Firing another tab for this is done here. Later, doing this case instead or also in UT should be considered if reliably possible with the means provided.
+  * The basket is intact whe the user returns
 
 #### Sub-Suite: Shopping without intent to check-out
 

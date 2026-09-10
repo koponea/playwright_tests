@@ -1,10 +1,9 @@
 import { test, expect, type Locator, type Page } from '@playwright/test';
-import * as fs from 'fs';
-import * as zlib from 'zlib';
 const { describe } = require('@playwright/test')
 const config = require('../utils/config')
-
-/******UNDER CONSTRUCTION !! tests all playable***/
+//const helper = require('../utils/helper')
+import * as fs from 'fs';
+import * as zlib from 'zlib';
 
 interface User {
   password: string;
@@ -503,6 +502,42 @@ describe('Saucedemo shopping portal', () => {
     await loginPage.login(defaultUser, loginPage.secondaryTitleText, page);
     await page.waitForURL(new RegExp(`^${baseUrl}${pathInventory}.*`));
 
-    // login complete, continue case after this
+    const targetUrl = 'https://saucelabs.com/';
+
+    const inventoryPage = new SauceDemoInventoryPage(page);
+    const cartPage = new SauceDemoCartPage(page);
+
+    const item1 = 'sauce-labs-backpack';
+    const item2 = 'sauce-labs-bike-light';
+
+    // Add two items to cart
+    await inventoryPage.addToCartBtn(item1).click();
+    await expect(inventoryPage.cartBadge).toHaveText('1');
+    await inventoryPage.addToCartBtn(item2).click();
+    await expect(inventoryPage.cartBadge).toHaveText('2');
+
+    // Navigate to cart and verify items
+    await inventoryPage.goToCart();
+    await expect(cartPage.cartItems).toHaveCount(2);
+
+    // Open burger menu, get About link href and open it in a new tab
+    await page.locator('#react-burger-menu-btn').click();
+    await page.locator(dataTest('about-sidebar-link')).waitFor({ state: 'visible' });
+    const aboutHref = await page.locator(dataTest('about-sidebar-link')).getAttribute('href') ?? '';
+    const aboutPage = await page.context().newPage();
+    await aboutPage.goto(aboutHref);
+    await expect(aboutPage).toHaveURL(targetUrl);
+
+    // Close external tab — original tab stays on cart with items intact
+    await aboutPage.close();
+    await page.locator('#react-burger-cross-btn').click();
+    await expect(page).toHaveURL(new RegExp(`^${baseUrl}${pathCart}.*`));
+    await expect(cartPage.cartItems).toHaveCount(2);
+    await expect(inventoryPage.cartBadge).toHaveText('2');
+
+    // Return to inventory — cart contents still persist
+    await cartPage.continueShopping.click();
+    await page.waitForURL(new RegExp(`^${baseUrl}${pathInventory}.*`));
+    await expect(inventoryPage.cartBadge).toHaveText('2');
   });
 });
