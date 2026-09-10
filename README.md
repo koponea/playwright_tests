@@ -140,6 +140,6 @@ npx playwright show-report
 
 - Also, is the DB usage tested for concurrent use if the same user in different browsers has baskets entering the checkout phase? Playwright runs tests havily in parallell which in turn could be really efficient, but the correct usage of the utilized DB as such will not verified within the current timebox.
 
-- The playwright timeout is increased in [playwright.config.md](tests/playwright.config.md) to allow more time for the login procedure. It should be adjusted when the headless login implememtation is introduced. For future test suites it is a must for reducing the suite time budget.
+- The playwright timeout is increased in [playwright.config.md](tests/playwright.config.md) to allow more time for the login procedure. It should be adjusted when the headless login implementation - or rather the login with setting the authrization state to the project state with taking care of the tests interdependencies - is introduced. For future test suites these are a must for reducing the suite time budget.
 
 - The test target is a publicly accessible website; no local server, separate authentication, or *.env* configuration is necessarily required (.env handling is offered and documented).

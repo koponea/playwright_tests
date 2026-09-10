@@ -33,7 +33,9 @@ const pathCheckoutComplete = '/checkout-complete.html';
 // pdf receipt at checkout e.g.:
 // file:///home/aila/Downloads/swag-labs-order-2026-09-09_19-44-47.pdf
 
-const dataTest = (locator: string) => `[data-test=${locator}]`
+const inventoryUrlRegex = new RegExp(`^${baseUrl}${pathInventory}.*`);
+
+const dataTest = (locator: string) => `[data-test="${locator}"]`
 
 function extractPdfText(pdfPath: string): string {
   const buf = fs.readFileSync(pdfPath);
@@ -97,12 +99,12 @@ class SauceDemoLoginPage {
   };
 
   async verifyAllLoginCredentials(users: string[] | User[]) {
-    users.forEach(async (user: string | User) => {
-      const userToCheck: User = (typeof user == 'string')
+    for (const user of users) {
+      const userToCheck: User = typeof user === 'string'
         ? { username: user, password: config.PASSWORD_DEFAULT }
         : user;
       await this.verifyLoginCredentials(userToCheck);
-    });
+    }
   }
 
   async useLoginCredentials(user: User) {
@@ -127,6 +129,7 @@ class SauceDemoLoginPage {
     await this.verifyLoginCredentials(user);
     await this.useLoginCredentials(user);
     await this.submitAndVerifyLanding(bodyTextToWait, page);
+    await page.waitForURL(inventoryUrlRegex);
   };
 }
 
@@ -275,7 +278,9 @@ class SauceDemoCheckoutCompletePage {
 }
 
 describe('Saucedemo shopping portal', () => {
-  test('Basic login and general access credentials', async ({ page }) => {
+  test('Basic login and general access credentials', async ({ browser }) => {
+    const context = await browser.newContext(); // ei storageStatea → kirjautumaton
+    const page = await context.newPage();
     const loginPage = new SauceDemoLoginPage(page);
     await loginPage.goto();
 
@@ -289,12 +294,13 @@ describe('Saucedemo shopping portal', () => {
     await loginPage.submitAndVerifyLanding(loginPage.secondaryTitleText, page);
 
     await expect(page.url()).toBe(`${baseUrl}${pathInventory}`);
+    await context.close();
   });
+
   describe('Shopping without intent to check-out', () => {
     test('Items can be browsed and de-carted with regular logout', async ({ page }) => {
       const loginPage = new SauceDemoLoginPage(page);
       await loginPage.login(defaultUser, loginPage.secondaryTitleText, page);
-      await page.waitForURL(new RegExp(`^${baseUrl}${pathInventory}.*`));
 
       const inventoryPage = new SauceDemoInventoryPage(page);
       const detailsPage = new SauceDemoDetailsPage(page);
@@ -322,7 +328,7 @@ describe('Saucedemo shopping portal', () => {
 
       // Return to inventory via Back to Products link
       await detailsPage.goBackToInventory();
-      await expect(page).toHaveURL(new RegExp(`^${baseUrl}${pathInventory}.*`));
+      await expect(page).toHaveURL(inventoryUrlRegex);
       await expect(inventoryPage.cartBadge).toHaveText('1');
 
       // Navigate to cart
@@ -336,7 +342,7 @@ describe('Saucedemo shopping portal', () => {
 
       // Return to inventory and log out
       await cartPage.continueShopping.click();
-      await page.waitForURL(new RegExp(`^${baseUrl}${pathInventory}.*`));
+      await page.waitForURL(inventoryUrlRegex);
       await inventoryPage.logout();
       await expect(loginPage.loginButton).toBeVisible();
     });
@@ -344,7 +350,6 @@ describe('Saucedemo shopping portal', () => {
     test('Bailing out mid shopping', async ({ page }) => {
       const loginPage = new SauceDemoLoginPage(page);
       await loginPage.login(defaultUser, loginPage.secondaryTitleText, page);
-      await page.waitForURL(new RegExp(`^${baseUrl}${pathInventory}.*`));
 
       const inventoryPage = new SauceDemoInventoryPage(page);
       const detailsPage = new SauceDemoDetailsPage(page);
@@ -367,7 +372,7 @@ describe('Saucedemo shopping portal', () => {
 
       // Return to inventory via Back to Products link
       await detailsPage.goBackToInventory();
-      await expect(page).toHaveURL(new RegExp(`^${baseUrl}${pathInventory}.*`));
+      await expect(page).toHaveURL(inventoryUrlRegex);
 
       // Cart is still full — user bails out without emptying it
       await expect(inventoryPage.cartBadge).toHaveText('2');
@@ -382,7 +387,6 @@ describe('Saucedemo shopping portal', () => {
     test('Checking out with purchase and receipt', async ({ page }) => {
       const loginPage = new SauceDemoLoginPage(page);
       await loginPage.login(defaultUser, loginPage.secondaryTitleText, page);
-      await page.waitForURL(new RegExp(`^${baseUrl}${pathInventory}.*`));
 
       const inventoryPage = new SauceDemoInventoryPage(page);
       const cartPage = new SauceDemoCartPage(page);
@@ -433,7 +437,7 @@ describe('Saucedemo shopping portal', () => {
 
       // Back Home → inventory → logout
       await checkoutCompletePage.goBackHome();
-      await expect(page).toHaveURL(new RegExp(`^${baseUrl}${pathInventory}.*`));
+      await expect(page).toHaveURL(inventoryUrlRegex);
       await inventoryPage.logout();
       await expect(loginPage.loginButton).toBeVisible();
     });
@@ -441,7 +445,6 @@ describe('Saucedemo shopping portal', () => {
     test('Cheking out with no purchase', async ({ page }) => {
       const loginPage = new SauceDemoLoginPage(page);
       await loginPage.login(defaultUser, loginPage.secondaryTitleText, page);
-      await page.waitForURL(new RegExp(`^${baseUrl}${pathInventory}.*`));
 
       const inventoryPage = new SauceDemoInventoryPage(page);
       const cartPage = new SauceDemoCartPage(page);
@@ -491,7 +494,7 @@ describe('Saucedemo shopping portal', () => {
 
       // Back Home → inventory → logout
       await checkoutCompletePage.goBackHome();
-      await expect(page).toHaveURL(new RegExp(`^${baseUrl}${pathInventory}.*`));
+      await expect(page).toHaveURL(inventoryUrlRegex);
       await inventoryPage.logout();
       await expect(loginPage.loginButton).toBeVisible();
     });
@@ -500,7 +503,6 @@ describe('Saucedemo shopping portal', () => {
   test('Linking outside the portal', async ({ page }) => {
     const loginPage = new SauceDemoLoginPage(page);
     await loginPage.login(defaultUser, loginPage.secondaryTitleText, page);
-    await page.waitForURL(new RegExp(`^${baseUrl}${pathInventory}.*`));
 
     const targetUrl = 'https://saucelabs.com/';
 
@@ -537,7 +539,7 @@ describe('Saucedemo shopping portal', () => {
 
     // Return to inventory — cart contents still persist
     await cartPage.continueShopping.click();
-    await page.waitForURL(new RegExp(`^${baseUrl}${pathInventory}.*`));
+    await page.waitForURL(inventoryUrlRegex);
     await expect(inventoryPage.cartBadge).toHaveText('2');
   });
 });

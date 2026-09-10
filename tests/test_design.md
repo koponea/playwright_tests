@@ -39,7 +39,7 @@ The suite structure is depicted in the below sub-chapters with small description
 
 ### Main suite: Saucedemo shopping portal
 
-The suite uses the user with most rights in the portal to do all the tests - all the tests do a login in the beginng of the test. The different users' access right and authorization tests will not be concluded in this suite at this moment, though trhy should be heavily considered to be included later.
+The suite uses the user with most rights in the portal to do all the tests. Now the tests do a regular time-consuming login in the beginng of the test, but it is highly beneficial to change it to a solution to do the authentication once per suite and save it to a __project state__ (storageState) for reuse in all of the tests. The different users' access right and authorization tests will not be concluded in this suite at this moment, though they should be heavily considered to be included later even if might complicate things with above login improvements.
 
 The descriptions in this chapter are used as partial input for a large language model for aiding in creating the 5/6 test cases and the parts not handling login or the login Page Object.
 
@@ -95,7 +95,7 @@ Test ownership is currently fully at creator (Aila Koponen). The review process,
 
 ## Risks, Limitations & Known Challenges
 
-* No APIs available at the moment, this might pose a risk for effective means e.g. headless login in order to test all not-login functionalities. Also verification of the data input would benefit from direct DB access via APIs
+* No APIs available at the moment, this might pose a risk for effective means e.g. headless login in order to test all not-login functionalities, though the project state based login solution will ease the pain substantially. Also verification of the data input would benefit from direct DB access via APIs
 * The portal seems to have problems in requirement handling or clear errors e.g. a client can purchase 0 items and check-out getting a receipt, which should not be possible. This indicates that there might be some underlying structure problems, or a bunch of bigger problems that need application refactoring
 * The portal code does not use 'test-dataid':s but non-standard arributes for accessing elements.
 
