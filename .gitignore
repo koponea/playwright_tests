@@ -13,3 +13,7 @@ lazy_kopone.md
 
 #config
 .env
+
+#claude
+CLAUDE.md
+/.claude/
