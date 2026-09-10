@@ -444,7 +444,57 @@ describe('Saucedemo shopping portal', () => {
       await loginPage.login(defaultUser, loginPage.secondaryTitleText, page);
       await page.waitForURL(new RegExp(`^${baseUrl}${pathInventory}.*`));
 
-      // login complete, continue case after this
+      const inventoryPage = new SauceDemoInventoryPage(page);
+      const cartPage = new SauceDemoCartPage(page);
+      const checkoutInfoPage = new SauceDemoCheckoutInfoPage(page);
+      const checkoutOverviewPage = new SauceDemoCheckoutOverviewPage(page);
+      const checkoutCompletePage = new SauceDemoCheckoutCompletePage(page);
+
+      const item1 = 'sauce-labs-bolt-t-shirt';
+
+      // Add item to cart, then go to cart
+      await inventoryPage.addToCartBtn(item1).click();
+      await expect(inventoryPage.cartBadge).toHaveText('1');
+      await inventoryPage.goToCart();
+      await expect(cartPage.cartItems).toHaveCount(1);
+
+      // Empty the cart before checkout
+      await cartPage.removeItemBtn(item1).click();
+      await expect(cartPage.cartItems).toHaveCount(0);
+      await expect(inventoryPage.cartBadge).not.toBeVisible();
+
+      // Proceed to checkout with empty cart
+      await cartPage.goToCheckout();
+      await expect(page).toHaveURL(new RegExp(`^${baseUrl}${pathCheckoutInfo}.*`));
+      await expect(page.locator(dataTest('title'))).toHaveText('Checkout: Your Information');
+
+      // Fill in customer information and continue
+      await checkoutInfoPage.fillAndContinue(defaultUserFirstName, defaultUserSurName, defaultUserPostalCode);
+      await expect(page).toHaveURL(new RegExp(`^${baseUrl}${pathCheckoutOverview}.*`));
+
+      // Verify overview shows no items and zero total
+      await expect(checkoutOverviewPage.cartItems).toHaveCount(0);
+      const totalText = await checkoutOverviewPage.totalLabel.textContent() ?? '';
+      expect(totalText).toContain('$0');
+
+      // Finish the order
+      await checkoutOverviewPage.finish();
+      await expect(page).toHaveURL(new RegExp(`^${baseUrl}${pathCheckoutComplete}.*`));
+      await expect(checkoutCompletePage.completeHeader).toHaveText('Thank you for your order!');
+
+      // Download PDF receipt and verify name and zero total
+      const pdfPath = '/tmp/swag-labs-receipt-no-purchase.pdf';
+      await checkoutCompletePage.downloadPdf(pdfPath);
+      const pdfText = extractPdfText(pdfPath);
+      expect(pdfText).toContain(defaultUserFirstName);
+      expect(pdfText).toContain(defaultUserSurName);
+      expect(pdfText).toContain('0.00');
+
+      // Back Home → inventory → logout
+      await checkoutCompletePage.goBackHome();
+      await expect(page).toHaveURL(new RegExp(`^${baseUrl}${pathInventory}.*`));
+      await inventoryPage.logout();
+      await expect(loginPage.loginButton).toBeVisible();
     });
   });
 
