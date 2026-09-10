@@ -1,4 +1,6 @@
 import { test, expect, type Locator, type Page } from '@playwright/test';
+import * as fs from 'fs';
+import * as zlib from 'zlib';
 const { describe } = require('@playwright/test')
 const config = require('../utils/config')
 
@@ -15,6 +17,10 @@ const defaultUser: User = {
 const defultUsernameArray: string[] =
   config.USERNAMES_DEFAULT.split(/\s+/);
 
+const defaultUserPostalCode = '01800';
+const defaultUserFirstName = 'Kerttu';
+const defaultUserSurName = 'Ketteryysguru';
+
 const baseUrl = config.DEMO_PORTAL_URL.replace(/\/$/g, ''); // .TrimEnd('/');
 const portalHeader = config.DEMO_PORTAL_HEADER;
 const portalHomeSecondaryHeader = 'Products';
@@ -29,6 +35,32 @@ const pathCheckoutComplete = '/checkout-complete.html';
 // file:///home/aila/Downloads/swag-labs-order-2026-09-09_19-44-47.pdf
 
 const dataTest = (locator: string) => `[data-test=${locator}]`
+
+function extractPdfText(pdfPath: string): string {
+  const buf = fs.readFileSync(pdfPath);
+  const startMarker = Buffer.from('stream\n');
+  const endMarker = Buffer.from('\nendstream');
+  const texts: string[] = [];
+  let pos = 0;
+  while (pos < buf.length) {
+    const s = buf.indexOf(startMarker, pos);
+    if (s === -1) break;
+    const dataStart = s + startMarker.length;
+    const e = buf.indexOf(endMarker, dataStart);
+    if (e === -1) { pos = s + 1; continue; }
+    try {
+      const content = zlib.inflateSync(buf.slice(dataStart, e)).toString('latin1');
+      const hexMatches = content.match(/<([0-9a-fA-F]+)>/g) || [];
+      hexMatches.forEach(m => {
+        const hex = m.slice(1, -1);
+        if (hex.length % 2 === 0)
+          texts.push(Buffer.from(hex, 'hex').toString('latin1'));
+      });
+    } catch { /* skip non-FlateDecode streams */ }
+    pos = e + 1;
+  }
+  return texts.join('');
+}
 
 class SauceDemoLoginPage {
   readonly page: Page;
@@ -166,13 +198,82 @@ class SauceDemoCartPage {
   removeItemBtn(item: string): Locator {
     return this.page.locator(dataTest(`remove-${item}`));
   }
+
+  async goToCheckout(): Promise<void> {
+    await this.page.locator(dataTest('checkout')).click();
+    await this.page.waitForURL(/checkout-step-one/);
+  }
 }
 
-class SauceDemoCheckoutInfoPage { }
+class SauceDemoCheckoutInfoPage {
+  readonly page: Page;
+  readonly firstNameInput: Locator;
+  readonly lastNameInput: Locator;
+  readonly postalCodeInput: Locator;
+  readonly continueBtn: Locator;
 
-class SauceDemoCheckoutOverviewPage { }
+  constructor(page: Page) {
+    this.page = page;
+    this.firstNameInput = page.locator(dataTest('firstName'));
+    this.lastNameInput = page.locator(dataTest('lastName'));
+    this.postalCodeInput = page.locator(dataTest('postalCode'));
+    this.continueBtn = page.locator(dataTest('continue'));
+  }
 
-class SauceDemoCheckoutCompletePage { }
+  async fillAndContinue(firstName: string, lastName: string, postalCode: string): Promise<void> {
+    await this.firstNameInput.fill(firstName);
+    await this.lastNameInput.fill(lastName);
+    await this.postalCodeInput.fill(postalCode);
+    await this.continueBtn.click();
+    await this.page.waitForURL(/checkout-step-two/);
+  }
+}
+
+class SauceDemoCheckoutOverviewPage {
+  readonly page: Page;
+  readonly cartItems: Locator;
+  readonly totalLabel: Locator;
+  readonly finishBtn: Locator;
+
+  constructor(page: Page) {
+    this.page = page;
+    this.cartItems = page.locator(dataTest('inventory-item'));
+    this.totalLabel = page.locator(dataTest('total-label'));
+    this.finishBtn = page.locator(dataTest('finish'));
+  }
+
+  async finish(): Promise<void> {
+    await this.finishBtn.click();
+    await this.page.waitForURL(/checkout-complete/);
+  }
+}
+
+class SauceDemoCheckoutCompletePage {
+  readonly page: Page;
+  readonly completeHeader: Locator;
+  readonly generatePdfBtn: Locator;
+  readonly backHomeBtn: Locator;
+
+  constructor(page: Page) {
+    this.page = page;
+    this.completeHeader = page.locator(dataTest('complete-header'));
+    this.generatePdfBtn = page.locator(dataTest('generate-pdf-order'));
+    this.backHomeBtn = page.locator(dataTest('back-to-products'));
+  }
+
+  async downloadPdf(savePath: string): Promise<void> {
+    const [download] = await Promise.all([
+      this.page.waitForEvent('download'),
+      this.generatePdfBtn.click(),
+    ]);
+    await download.saveAs(savePath);
+  }
+
+  async goBackHome(): Promise<void> {
+    await this.backHomeBtn.click();
+    await this.page.waitForURL(/inventory\.html/);
+  }
+}
 
 describe('Saucedemo shopping portal', () => {
   test('Basic login and general access credentials', async ({ page }) => {
@@ -281,15 +382,66 @@ describe('Saucedemo shopping portal', () => {
   describe('Shopping with intent to check-out', () => {
     test('Checking out with purchase and receipt', async ({ page }) => {
       const loginPage = new SauceDemoLoginPage(page);
-      await loginPage.login(defaultUser, loginPage.secondaryTitleText, page)
+      await loginPage.login(defaultUser, loginPage.secondaryTitleText, page);
       await page.waitForURL(new RegExp(`^${baseUrl}${pathInventory}.*`));
 
-      // login complete, continue case after this
+      const inventoryPage = new SauceDemoInventoryPage(page);
+      const cartPage = new SauceDemoCartPage(page);
+      const checkoutInfoPage = new SauceDemoCheckoutInfoPage(page);
+      const checkoutOverviewPage = new SauceDemoCheckoutOverviewPage(page);
+      const checkoutCompletePage = new SauceDemoCheckoutCompletePage(page);
+
+      const item1 = 'sauce-labs-backpack';
+      const item1Name = 'Sauce Labs Backpack';
+
+      // Add item to cart
+      await inventoryPage.addToCartBtn(item1).click();
+      await expect(inventoryPage.cartBadge).toHaveText('1');
+
+      // Go to cart and verify item is there
+      await inventoryPage.goToCart();
+      await expect(cartPage.cartItems).toHaveCount(1);
+      await expect(page.locator(dataTest('inventory-item-name'))).toHaveText(item1Name);
+
+      // Proceed to checkout step one
+      await cartPage.goToCheckout();
+      await expect(page).toHaveURL(new RegExp(`^${baseUrl}${pathCheckoutInfo}.*`));
+      await expect(page.locator(dataTest('title'))).toHaveText('Checkout: Your Information');
+
+      // Fill in customer information and continue
+      await checkoutInfoPage.fillAndContinue(defaultUserFirstName, defaultUserSurName, defaultUserPostalCode);
+      await expect(page).toHaveURL(new RegExp(`^${baseUrl}${pathCheckoutOverview}.*`));
+
+      // Verify item and total on overview
+      await expect(checkoutOverviewPage.cartItems).toHaveCount(1);
+      await expect(page.locator(dataTest('inventory-item-name'))).toHaveText(item1Name);
+      const totalText = await checkoutOverviewPage.totalLabel.textContent() ?? '';
+      await expect(checkoutOverviewPage.totalLabel).toContainText('$');
+
+      // Finish the order
+      await checkoutOverviewPage.finish();
+      await expect(page).toHaveURL(new RegExp(`^${baseUrl}${pathCheckoutComplete}.*`));
+      await expect(checkoutCompletePage.completeHeader).toHaveText('Thank you for your order!');
+
+      // Download PDF receipt and verify name and total amount
+      const pdfPath = '/tmp/swag-labs-receipt-test.pdf';
+      await checkoutCompletePage.downloadPdf(pdfPath);
+      const pdfText = extractPdfText(pdfPath);
+      expect(pdfText).toContain(defaultUserFirstName);
+      expect(pdfText).toContain(defaultUserSurName);
+      const numericTotal = (totalText.match(/[\d.]+/) ?? [])[0] ?? '';
+      expect(pdfText).toContain(numericTotal);
+
+      // Back Home → inventory → logout
+      await checkoutCompletePage.goBackHome();
+      await expect(page).toHaveURL(new RegExp(`^${baseUrl}${pathInventory}.*`));
+      await inventoryPage.logout();
+      await expect(loginPage.loginButton).toBeVisible();
     });
 
     test('Cheking out with no purchase', async ({ page }) => {
       const loginPage = new SauceDemoLoginPage(page);
-      await loginPage.login(defaultUser, loginPage.secondaryTitleText, page)
+      await loginPage.login(defaultUser, loginPage.secondaryTitleText, page);
       await page.waitForURL(new RegExp(`^${baseUrl}${pathInventory}.*`));
 
       // login complete, continue case after this
@@ -298,7 +450,7 @@ describe('Saucedemo shopping portal', () => {
 
   test('Linking outside the portal', async ({ page }) => {
     const loginPage = new SauceDemoLoginPage(page);
-    await loginPage.login(defaultUser, loginPage.secondaryTitleText, page)
+    await loginPage.login(defaultUser, loginPage.secondaryTitleText, page);
     await page.waitForURL(new RegExp(`^${baseUrl}${pathInventory}.*`));
 
     // login complete, continue case after this
