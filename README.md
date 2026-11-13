@@ -4,6 +4,8 @@ This repository contains a project with a test folder containig a restricted but
 
 The test target site is <https://www.saucedemo.com/>. The tests cover the site’s core features and risks.
 
+See for branching information in the playwright_tests/tests folder in README.md for the test design document.
+
 ## Requirements for the tests implementation
 
 The original requirements set include the following specifications:
