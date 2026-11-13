@@ -8,7 +8,7 @@ The test target site is <https://www.saucedemo.com/>. The tests cover the siteâ€
 
 The tests stay in all branches intact to avoid the need to ask for a permission to stress the target portal for purposes of new tests development.
 
-### Branch out: syyskuun_alussa
+### Branch: syyskuun_alussa
 
 This branch is the original fast setup, branched out Sept 2026. The reasoning for branching out is to leave the documentation intact as it was, with some forwarding assumptions left not documented as self-evident due to the original assumption: this is the first E2E suite for a 'portal under construction' as the functionality from that point of view was far from complete.
 
@@ -20,7 +20,7 @@ The scope definition, notes and observations included were meant to provide feed
 
 ### Branch: main
 
-Additional documentation tuning to add visibility of the assumptions made when designing the tests in syyskuun_alussa, e.g. the user.
+Additional documentation tuning to add visibility of the assumptions made when designing the tests in syyskuun_alussa, e.g. the user. Update tbd.
 
 ## Notes
 
