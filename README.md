@@ -1,14 +1,16 @@
 # Repository playwrite_tests
 
-This repository contains a project with a test folder containig a restricted but efficient UI automation suite implemented using Playwright and Typescript.
+This repository contains a project with a test folder containing a restricted but efficient UI automation suite implemented using Playwright and Typescript.
 
 The test target site is <https://www.saucedemo.com/>. The tests cover the site’s core features and risks.
+
+See also 'Notes and some concerns' in the last chapter of this document when continuing this test effort in the future.
 
 See for branching information in the playwright_tests/tests folder in README.md for the test design document.
 
 ## Requirements for the tests implementation
 
-The original requirements set include the following specifications:
+The original requirements include the following small set of specifications:
 
 - Tests must use a web-browser (no API-only solutions)
 - No fixed sleeps
@@ -136,12 +138,12 @@ View the HTML report after a run:
 npx playwright show-report
 ```
 
-### Notes and some future concerns
+### Notes and some concerns when continuing this test effort on the target in the future
 
-- The project configurations in [playwright.config.md](tests/playwright.config.md) are by default running tests parallel using multiple workers. There might be need to run non-parallel due to e.g. the checkout phase and the fact that the suite needs to log in with the user with most rights when only one such is currently provided. This suite does not do testing of the user handling more than what is needed to login and to verify that the login works generally as expected.
+- The project configurations in [playwright.config.md](tests/playwright.config.md) are set by default to run tests in parallel using multiple workers. In the future, there might be need to run non-parallel due to e.g. the checkout phase and the fact that the suite needs to log in with a user with a definite set of rights. Only one user is currently provided per user rights set in the portal original setup, thus multiple sessions can be open for parallel tests. The test suite collective behavior when some of the tests fail is not planned to be tested at his point due to the suite not running yet in an automated loop. This specific suite is not planned to do testing of the user handling more than what is needed to login and to verify that the portal login works generally as expected.
 
-- Also, is the DB usage tested for concurrent use if the same user in different browsers has baskets entering the checkout phase? Playwright runs tests havily in parallell which in turn could be really efficient, but the correct usage of the utilized DB as such will not verified within the current timebox.
+- A question arises on whether the DB usage is tested for concurrent use if the same user in different browsers has baskets entering the checkout phase? Playwright runs tests heavily in parallel which in turn could be really efficient, but the correct usage of the utilized DB as such is not planned to be verified within the current time-box.
 
-- The playwright timeout is increased in [playwright.config.md](tests/playwright.config.md) to allow more time for the login procedure. It should be adjusted when the headless login implementation - or rather the login with setting the authrization state to the project state with taking care of the tests interdependencies - is introduced. For future test suites these are a must for reducing the suite time budget.
+- The playwright timeout is currently increased in [playwright.config.md](tests/playwright.config.md) to allow more time for the login procedure. It should be adjusted when the headless login is implemented, or rather when the login - with setting the authorization state to the project state with taking care of the tests inter-dependencies - is introduced. For future test suites these are a must for reducing the suite time budget.
 
-- The test target is a publicly accessible website; no local server, separate authentication, or *.env* configuration is necessarily required (.env handling is offered and documented).
+- Note, that the test target is a publicly accessible website; no local server, separate authentication, or *.env* configuration is necessarily required (.env handling is offered and documented).
