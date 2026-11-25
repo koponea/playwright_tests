@@ -2,20 +2,20 @@
 
 ## Introduction / Purpose
 
-The application under test is the externally freely accessible demo site at <https://www.saucedemo.com/>. The aim of this automation project is to create a restricted but an efficient test suite for demo purposes.
+The application under test is the externally freely accessible demo site at <https://www.saucedemo.com/>. The aim of this automation project is to create a restricted but an efficient test suite for QA-exercise purposes. The chosen target serves as a 'portal-under-development' and thus is not to be considered as a finite portal, nor an enterprise demo-portal with non-real-life widgets as such. The documentation assumes this QA effort to be the first e2e-suite for the unfinished portal, and to document also some found flaws and open questions in absence of other planning or backlog tooling at this stage (e.g. Jira).
 
 ## Scope
 
-The core features of the site are to be covered in the suite, which should match with the end-to-end nature of the tests. Some of the most meaningful main flows and features are to be targeted, depicting the probable user behavior. Due to the time constraints and the nature of the test suite given in the requirements in [project README.md](../README.md), some scope restrictions are applied to the work as listed below, and should be later be largely considered as improvement or new work items to suitable design backlogs when aproppriate.
+The core features of the site are to be covered in the suite, which should match with the end-to-end nature of the tests. Some of the most meaningful main flows and features are to be targeted, depicting the probable user behavior. Due to the time constraints and the nature of the test suite given in the requirements in [project README.md](../README.md), some scope restrictions are applied to the work as listed below, and should be later be largely considered as improvement or new work items to suitable design backlogs when appropriate.
 
 __Outscoped:__
 
 * The user actions outside the portal
 * The user actions in then login page which do not lead to a regular successful login, and in overall the login error scenarios
 * The different users' and user role visibility and usage tests: access right and authorization tests should be widely taken into account in later test automation design efforts, including also the *headless login* possibility for the portal test environment or framework if appropriate
-* The tests that can be easily covered by page concentrated tests or unit tests, or e.g. by enhancing this suite - or implementing its own ui-access based specific feature related test suite as a differnet approach or testing level
-* Filtering in the portal invenory - the icon in the sorting dropdown hints filtering, but none provided at the moment.
-* Browser provided regular means - buttos, arrows etc, e.g. navigating arrows, typing *directly* to the visible address bar in ui, and reload
+* The tests that can be easily covered by page concentrated tests or unit tests, or e.g. by enhancing this suite - or implementing its own UI-access based specific feature related test suite as a different approach or testing level
+* Filtering in the portal inventory - the icon in the sorting drop-down hints filtering, but none provided at the moment.
+* Browser provided regular means - buttons, arrows etc, e.g. navigating arrows, typing *directly* to the visible address bar in UI, and reload
 
 ## Test Strategy and Approach
 
@@ -71,13 +71,13 @@ The descriptions in this chapter are used as partial input for a large language 
 * __Case: *'Checking out with no purchase'*__
   * A regular shopping session otherwise but no items selected
   * Proceed to check out by filling the requested information forms while proceeding
-  * See that a pdf receipt is received with 0 billed credits ( this hould be an unsuccessful case? - Portal requirements)
+  * See that a pdf receipt is received with 0 billed credits ( this should be an unsuccessful case? - Portal requirements)
 
 ## Test Architecture
 
-The folder and project structure is the regular one produced during a npm Playwright project installation, such as described in the [project README.md](../README.md). Additionally helpers are provided in the *utils* directory and the coding attempts to enhance reusability.
+The folder and project structure is the regular one produced during a npm Playwright project installation, such as described in the [project README.md](../README.md). Additionally helpers are provided in the *utils* directory and the coding attempts to enhance re-usability.
 
-The selector strategy in the suite was planned to use in addition to component css locators and some regular __data-testid__ sttributes but those are not available. Instead the implementation uses __test-data__ named attributes, so a shortcut function for creating locators is implemented to access portal elements.
+The selector strategy in the suite was planned to use in addition to component css locators and some regular __data-testid__ attributes but those are not available. Instead the implementation uses __test-data__ named attributes, so a shortcut function for creating locators is implemented to access portal elements.
 
 ## Test Data Management
 
@@ -97,7 +97,7 @@ Test ownership is currently fully at creator (Aila Koponen). The review process,
 
 * No APIs available at the moment, this might pose a risk for effective means e.g. headless login in order to test all not-login functionalities, though the project state based login solution will ease the pain substantially. Also verification of the data input would benefit from direct DB access via APIs
 * The portal seems to have problems in requirement handling or clear errors e.g. a client can purchase 0 items and check-out getting a receipt, which should not be possible. This indicates that there might be some underlying structure problems, or a bunch of bigger problems that need application refactoring
-* The portal code does not use 'test-dataid':s but non-standard arributes for accessing elements.
+* The portal code does not use 'test-dataid':s but non-standard attributes for accessing elements.
 
 ## Timeline
 
