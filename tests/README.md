@@ -18,14 +18,18 @@ Now this said, the test design documentation in this branch contains notes on pr
 
 The scope definition, notes and observations included were meant to provide feedback also for further QA design. This, in e.g. a real agile development environment, would have been communicated directly to the designers, or e.g. via GitHub/GitLab/Gerrit commenting, or Jira ticketing as bug reports, or user stories with development items in the backlog - instead of the blunt suite design document notes. If a test plan was to be created after this first fast test suite, that could have also covered all the above observations, host the plans to mitigate the test coverage gaps for the missing functionality and tests for the future portal fixes - all for augmenting the work backlog if not yet included.
 
+**NOTE: THE CHOSEN USER can be read from** the suite config (USERNAME_DEFAULT: performance_glitch_user) if not re-assigned in runtime from env var or .env file (see example in the example.env)
+
 ### Branch: main
 
-Additional documentation tuning to add visibility of the assumptions made when designing the tests in syyskuun_alussa, e.g. the user. Update tbd.
+Additional documentation tuning to add visibility of the assumptions made when designing the tests in branch syyskuun_alussa.
 
 ## Notes
 
 - The test target is a publicly accessible website; no local server, separate authentication, or `.env` configuration is required.
 
 - current: Running 4 workers parallel ~34 sec
+  
+- **THE CHOSEN USER can be read from** the suite config (USERNAME_DEFAULT: performance_glitch_user) if not re-assigned in runtime from env var or .env file (see example in the example.env)
 
 - See the upper level README.md for tests requirements, the repo cloning, and installation instructions when a clean test environment.
