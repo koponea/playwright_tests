@@ -39,7 +39,7 @@ The suite structure is depicted in the below sub-chapters with small description
 
 ### Main suite: Saucedemo shopping portal
 
-The suite uses the user with most rights in the portal to do all the tests. Now the tests do a regular time-consuming login in the beginng of the test, but it is highly beneficial to change it to a solution to do the authentication once per suite and save it to a __project state__ (storageState) for reuse in all of the tests. The different users' access right and authorization tests will not be concluded in this suite at this moment, though they should be heavily considered to be included later even if might complicate things with above login improvements.
+The suite uses the user with most rights in the portal to do all the tests - the user is not hardcoded, but an assumption is made the selection goes between the given **standard_user** or **performance_glitch_user** for the suite and portal stability verification. The performance_glitch_user is set as the default in the suite config, override can be done from the environment (or .env file) in runtime. Now the tests do a regular time-consuming login in the beginning of the test, but it is highly beneficial to change it to a solution to do the authentication once per suite and save it to a __project state__ (storageState) for reuse in all of the tests. The different users' access right and authorization tests will not be concluded in this suite at this moment, though they should be heavily considered to be included later even if might complicate things with above login improvements.
 
 The descriptions in this chapter are used as partial input for a large language model for aiding in creating the 5/6 test cases and the parts not handling login or the login Page Object.
 
